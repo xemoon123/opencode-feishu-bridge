@@ -63,7 +63,12 @@ ofbs
 ```
 
 > ⚠️ npm 上的 `opencode-feishu-bridge` 是**上游作者的包（1.0.3）**，不是本仓库；
-> `npm i -g opencode-feishu-bridge` 装到的不是这里的功能。请用上面的 clone 方式安装。
+> `npm i -g opencode-feishu-bridge` 装到的不是这里的功能。
+>
+> 本仓库发布到 npm 后使用作用域名（尚未发布）：
+> ```bash
+> npm i -g @xemoon123/opencode-feishu-bridge
+> ```
 
 首次启动若 `~/.config/opencode/feishu-bridge/config.json` 不存在，会在交互终端引导创建；也可手动按 `config.example.json` 创建。
 Windows 上同样是 `%USERPROFILE%\.config\opencode\feishu-bridge\config.json`（opencode 自身也用这套 XDG 约定）。
@@ -386,8 +391,19 @@ $env:OPENCODE_BIN = "C:\tools\opencode\opencode.exe"
 仓库：<https://github.com/xemoon123/opencode-feishu-bridge>
 
 1. 提交并推送：`git add -A && git commit -m "..." && git push`
-2. 打 tag：`git tag v1.1.0 && git push origin v1.1.0`
-3. 发布 npm（如需）：`npm pack --dry-run` 检查内容 → `npm publish --access public`
+2. 打 tag 并建 Release：`git tag -a v1.1.0 -m "..." && git push origin v1.1.0` →
+   `gh release create v1.1.0 --title "..." --notes-file <notes.md>`
+3. 发布 npm（可选）—— **包名 `@xemoon123/opencode-feishu-bridge`，作用域发布必须公开**：
+
+   ```bash
+   # 前置：npm 上 `xemoon123` 这个用户名需要先注册（npmjs.com/signup），然后登录
+   npm login
+
+   npm pack --dry-run     # 核对内容（当前 22 个文件 / ~78 KB）
+   npm publish            # publishConfig.access=public 已写在 package.json 里
+   ```
+
+   发布后的安装方式：`npm i -g @xemoon123/opencode-feishu-bridge`
 
 `.gitignore` 已排除 `node_modules/`、日志、`*.bak`、`.env*` 与 `.config/`；提交前请确认
 `~/.config/opencode/feishu-bridge/config.json`（含 appSecret）与 `session-state.json` 从未进入仓库。

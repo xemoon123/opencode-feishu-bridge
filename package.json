@@ -1,5 +1,5 @@
 {
-  "name": "opencode-feishu-bridge",
+  "name": "@xemoon123/opencode-feishu-bridge",
   "version": "1.1.0",
   "description": "飞书 ⇄ OpenCode 桥接服务：本地命令与 /m 菜单卡片、任务内提问/授权交互卡片、跨工作目录事件转发、文件直发（feishu_send_file MCP）。基于 opencode serve 的统一事件流，无需 opencode run 子进程。",
   "main": "dist/main.js",
@@ -23,6 +23,9 @@
   },
   "engines": {
     "node": ">=20"
+  },
+  "publishConfig": {
+    "access": "public"
   },
   "scripts": {
     "start": "node dist/main.js",
