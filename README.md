@@ -67,7 +67,7 @@ ofbs
 >
 > 本仓库发布到 npm 后使用作用域名（尚未发布）：
 > ```bash
-> npm i -g @xemoon123/opencode-feishu-bridge
+> npm i -g @xemoon/opencode-feishu-bridge
 > ```
 
 首次启动若 `~/.config/opencode/feishu-bridge/config.json` 不存在，会在交互终端引导创建；也可手动按 `config.example.json` 创建。
@@ -393,17 +393,30 @@ $env:OPENCODE_BIN = "C:\tools\opencode\opencode.exe"
 1. 提交并推送：`git add -A && git commit -m "..." && git push`
 2. 打 tag 并建 Release：`git tag -a v1.1.0 -m "..." && git push origin v1.1.0` →
    `gh release create v1.1.0 --title "..." --notes-file <notes.md>`
-3. 发布 npm（可选）—— **包名 `@xemoon123/opencode-feishu-bridge`，作用域发布必须公开**：
+3. 发布 npm（可选）—— **包名 `@xemoon/opencode-feishu-bridge`，作用域发布必须公开**：
+
+   作用域必须与 npm 用户名一致（本仓库维护者的 npm 账号是 `xemoon`；GitHub 是 `xemoon123`，两者不同）。
+   若要用别的 scope，需先在 npm 上创建同名组织。
 
    ```bash
-   # 前置：npm 上 `xemoon123` 这个用户名需要先注册（npmjs.com/signup），然后登录
-   npm login
+   npm login              # 当前登录身份：npm whoami
 
    npm pack --dry-run     # 核对内容（当前 22 个文件 / ~78 KB）
    npm publish            # publishConfig.access=public 已写在 package.json 里
    ```
 
-   发布后的安装方式：`npm i -g @xemoon123/opencode-feishu-bridge`
+   **账号开启 2FA 时**（否则报 `E403 ... Two-factor authentication ... required to publish`）二选一：
+
+   ```bash
+   # a) 每次发布带一次性验证码
+   npm publish --otp=123456
+
+   # b) 一劳永逸：在 npmjs.com/settings/<用户名>/tokens 建一个
+   #    Granular Access Token，权限 Read and write，勾选 "Bypass 2FA"，
+   #    然后在 npmrc 里用它（或 npm config set //registry.npmjs.org/:_authToken "<token>"）
+   ```
+
+   发布后的安装方式：`npm i -g @xemoon/opencode-feishu-bridge`
 
 `.gitignore` 已排除 `node_modules/`、日志、`*.bak`、`.env*` 与 `.config/`；提交前请确认
 `~/.config/opencode/feishu-bridge/config.json`（含 appSecret）与 `session-state.json` 从未进入仓库。
