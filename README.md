@@ -222,8 +222,10 @@ opencode-feishu-bridge/
 纯 CommonJS，无构建步骤；改完直接 `node dist/main.js` 运行。
 
 ```bash
-npm run typecheck    # 全部 dist 文件语法检查
-npm test             # 单元测试
+npm run typecheck     # 全部 dist 文件语法检查
+npm test              # 单元测试
+npm run deploy        # 同步到本机部署目录（~/opencode-feishu-bridge）并重启桥
+npm run deploy:check  # 只比对差异，不改动
 ```
 
 ## License

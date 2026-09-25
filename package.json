@@ -35,6 +35,8 @@
     "test": "node scripts/test-table-card.js && node scripts/test-opencode-exec.js",
     "test:table-card": "node scripts/test-table-card.js",
     "test:opencode-exec": "node scripts/test-opencode-exec.js",
+    "deploy": "bash scripts/deploy.sh",
+    "deploy:check": "bash scripts/deploy.sh --check",
     "pack": "npm pack --dry-run",
     "setup": "node scripts/install.js",
     "uninstall": "node scripts/uninstall.js"
