@@ -88,6 +88,11 @@ ofbs                              # 启动（npm 生成的 ofbs.cmd）
 [opencode-serve 127.0.0.1:4096]: launch kind=exe-shim source=C:\Users\me\AppData\Roaming\npm\opencode.cmd -> ...\opencode.exe
 ```
 
+> **实测环境**：Windows 11 专业版（build 26200）+ Node v24.18.0 + nvm4w。
+> `where opencode` 返回 `C:\nvm4w\nodejs\opencode`（sh 垫片）与 `opencode.cmd`，解析结果为
+> `kind=exe-shim` → `C:\nvm4w\nodejs\node_modules\opencode-ai\bin\opencode.exe`；
+> `opencode serve` 3 秒内就绪，`terminateChild` 303ms 内结束进程、端口立即释放、无残留 `opencode.exe`。
+
 若你的 opencode 装在非标准位置，用 `OPENCODE_BIN` 指定绝对路径（最高优先级）：
 
 ```powershell
