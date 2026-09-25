@@ -53,22 +53,22 @@ opencode(MCP client) ── stdio ── dist/feishu-mcp-server.js ── HTTP 4
 ## 安装
 
 ```bash
+# 方式一：npm 全局安装（推荐）
+npm i -g @xemoon/opencode-feishu-bridge
+ofbs                 # 启动（首次运行会引导创建配置）
+
+# 方式二：源码运行
 git clone https://github.com/xemoon123/opencode-feishu-bridge.git && cd opencode-feishu-bridge
 npm install
-
-npm start            # 直接运行（等价 node dist/main.js）
-# 或者装成全局命令，之后直接敲 ofbs / ofbc
+npm start            # 等价 node dist/main.js
+# 或装成全局命令，之后直接敲 ofbs / ofbc
 npm i -g .
-ofbs
 ```
 
-> ⚠️ npm 上的 `opencode-feishu-bridge` 是**上游作者的包（1.0.3）**，不是本仓库；
-> `npm i -g opencode-feishu-bridge` 装到的不是这里的功能。
+> ⚠️ **包名带作用域**：npm 上不带作用域的 `opencode-feishu-bridge` 是**上游作者的包（1.0.3）**，
+> `npm i -g opencode-feishu-bridge` 装到的不是本仓库的功能，请带上 `@xemoon/` 前缀。
 >
-> 本仓库发布到 npm 后使用作用域名（尚未发布）：
-> ```bash
-> npm i -g @xemoon/opencode-feishu-bridge
-> ```
+> 已发布版本：<https://www.npmjs.com/package/@xemoon/opencode-feishu-bridge>
 
 首次启动若 `~/.config/opencode/feishu-bridge/config.json` 不存在，会在交互终端引导创建；也可手动按 `config.example.json` 创建。
 Windows 上同样是 `%USERPROFILE%\.config\opencode\feishu-bridge\config.json`（opencode 自身也用这套 XDG 约定）。
