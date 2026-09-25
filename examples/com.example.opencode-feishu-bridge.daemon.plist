@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  系统级 LaunchDaemon 示例：开机即启动（无需登录），以 UserName 指定的用户身份运行。
+  使用前把 /ABS/PATH/TO 与 YOUR_USER 替换为本机实际值，然后：
+    sudo cp com.example.opencode-feishu-bridge.daemon.plist /Library/LaunchDaemons/com.example.opencode-feishu-bridge.plist
+    sudo launchctl bootstrap system /Library/LaunchDaemons/com.example.opencode-feishu-bridge.plist
+    sudo launchctl kickstart -k system/com.example.opencode-feishu-bridge
+  可选环境变量（按需加到下面的 EnvironmentVariables 里）：
+    OPENCODE_SERVE_WATCHDOG / OPENCODE_WATCHDOG_INTERVAL_MS / OPENCODE_WATCHDOG_FAIL_THRESHOLD
+    OPENCODE_WATCHDOG_TOOL_GRACE_MS / OPENCODE_DAILY_RESTART / OPENCODE_DAILY_RESTART_WINDOW_MS
+    OPENCODE_DAILY_RESTART_NOTIFY / FEISHU_TABLE_CARD
+-->
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.example.opencode-feishu-bridge</string>
+    <key>ProgramArguments</key>
+    <array>
+        <string>/opt/homebrew/bin/node</string>
+        <string>/ABS/PATH/TO/opencode-feishu-bridge/dist/main.js</string>
+    </array>
+    <key>WorkingDirectory</key>
+    <string>/ABS/PATH/TO/opencode-feishu-bridge</string>
+    <key>UserName</key>
+    <string>YOUR_USER</string>
+    <key>GroupName</key>
+    <string>staff</string>
+    <key>RunAtLoad</key>
+    <true/>
+    <key>KeepAlive</key>
+    <true/>
+    <key>StandardOutPath</key>
+    <string>/Users/YOUR_USER/.launchd-logs/ofbs.log</string>
+    <key>StandardErrorPath</key>
+    <string>/Users/YOUR_USER/.launchd-logs/ofbs.err.log</string>
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>HOME</key>
+        <string>/Users/YOUR_USER</string>
+        <key>PATH</key>
+        <string>/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
+    </dict>
+</dict>
+</plist>

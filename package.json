@@ -1,0 +1,60 @@
+{
+  "name": "opencode-feishu-bridge",
+  "version": "1.1.0",
+  "description": "飞书 ⇄ OpenCode 桥接服务：本地命令与 /m 菜单卡片、任务内提问/授权交互卡片、跨工作目录事件转发、文件直发（feishu_send_file MCP）。基于 opencode serve 的统一事件流，无需 opencode run 子进程。",
+  "main": "dist/main.js",
+  "type": "commonjs",
+  "files": [
+    "dist",
+    "bin",
+    "examples",
+    "README.md",
+    "CHANGELOG.md",
+    "LICENSE",
+    "config.example.json",
+    "skills",
+    "scripts"
+  ],
+  "bin": {
+    "opencode-feishu-bridge": "bin/opencode-attach.js",
+    "ofbc": "bin/opencode-attach.js",
+    "ofbs": "bin/opencode-feishu-start.js",
+    "ofbs-mcp": "dist/feishu-mcp-server.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "start": "node dist/main.js",
+    "ofbs": "node bin/opencode-feishu-start.js",
+    "attach": "node bin/opencode-attach.js",
+    "typecheck": "node --check dist/main.js && node --check dist/opencode.js && node --check dist/interaction.js && node --check dist/table-card.js && node --check dist/config.js && node --check dist/feishu-mcp-server.js",
+    "test:table-card": "node scripts/test-table-card.js",
+    "pack": "npm pack --dry-run",
+    "setup": "node scripts/install.js",
+    "uninstall": "node scripts/uninstall.js"
+  },
+  "keywords": [
+    "opencode",
+    "feishu",
+    "lark",
+    "chatbot",
+    "bridge",
+    "mcp"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/xemoon123/opencode-feishu-bridge.git"
+  },
+  "bugs": {
+    "url": "https://github.com/xemoon123/opencode-feishu-bridge/issues"
+  },
+  "homepage": "https://github.com/xemoon123/opencode-feishu-bridge#readme",
+  "author": "xemoon",
+  "license": "ISC",
+  "dependencies": {
+    "@larksuiteoapi/node-sdk": "^1.60.0",
+    "undici": "^8.10.2",
+    "zod": "^4.3.6"
+  }
+}

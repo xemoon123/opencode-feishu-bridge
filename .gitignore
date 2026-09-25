@@ -1,0 +1,12 @@
+node_modules/
+*.log
+.DS_Store
+.env
+.env.*
+*.pre-*
+*.bak
+.config/
+coverage/
+.npm/
+.npmtmp/
+*.tgz
