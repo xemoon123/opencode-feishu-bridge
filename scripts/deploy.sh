@@ -15,7 +15,7 @@ if [ "${1:-}" = "--check" ]; then
   CHECK=1
 fi
 
-ITEMS=(dist bin scripts skills examples package.json config.example.json README.md CHANGELOG.md LICENSE)
+ITEMS=(dist bin scripts skills examples package.json config.example.json README.md CHANGELOG.md LICENSE .gitignore)
 
 if [ ! -d "$DEPLOY_DIR/dist" ]; then
   echo "部署目录看起来不对：$DEPLOY_DIR" >&2

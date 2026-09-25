@@ -701,6 +701,11 @@ async function rejectSessionQuestion(questionId, directory) {
         method: "POST",
         directory: directory || OPENCODE_DEFAULT_WORKDIR
     });
+    // 404 = 服务端已无该提问（用户在其它端答过、或已超时被清理）。撤卡的目标状态本就是这个，
+    // 按成功处理，避免把正常的竞态记成 question_reply_failed 报错。
+    if (result.status === 404) {
+        return;
+    }
     if (result.status !== 200) { throw new Error(`跳过问题失败: HTTP ${String(result.status)} ${result.text.slice(0, 200)}`); }
 }
 async function replySessionPermission(permissionId, replyBody, directory) {

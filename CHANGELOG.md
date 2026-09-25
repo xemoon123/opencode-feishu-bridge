@@ -1,7 +1,13 @@
 # Changelog
 
-## 未发布
+## v1.1.1（2026-09-25）
 
+修复与静态检查：
+
+- **修复「提问已在其它端作答时提前撤卡」失效**：`cancelDanglingAsks` 里的 `pendingProbeCache` 声明为 `const` 却被整体重新赋值，探测成功后必定抛 `TypeError: Assignment to constant variable.`，把后半段撤卡逻辑整段跳过（生产日志累计 5 万余次）。改为就地更新缓存字段，撤卡路径恢复生效
+- **`/question/{id}/reject` 的 404 不再当失败**：提问已被其它端作答或已被服务端清理时返回 404 `QuestionNotFoundError`，此时撤卡的目标状态已达成，按成功处理，不再误报 `question_reply_failed`
+- 新增 `scripts/check-const-reassign.js`（并入 `npm run typecheck`）：静态检查「模块级 const 被重新赋值」——这类跨作用域错误 `node --check` 抓不到、只在运行时炸；检查器只判定无遮蔽歧义的名字，结论可靠。配套 `scripts/test-const-reassign.js`（并入 `npm test`）
+- npm 包页 README 同步为精简版（本版发布后生效）
 - 新增 `scripts/deploy.sh`（`npm run deploy` / `deploy:check`）：把仓库同步到本机部署目录（比对 → 复制 → 校验 dist/bin → 重启桥），把原先手工 `cp` + 重启的部署步骤固化，避免仓库与部署目录漂移
 - README 精简至约 230 行：移除维护过程性内容（发布步骤、实测记录、实现原理叙述），合并重复章节
 

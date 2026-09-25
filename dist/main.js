@@ -2168,7 +2168,11 @@ async function cancelDanglingAsks(sessionId) {
             console.error(`[watch]: pending_probe_failed session=${sessionId}`, error);
             return;
         }
-        pendingProbeCache = { sessionId, at: Date.now(), items };
+        // pendingProbeCache 是 const：只能改字段。整体重新赋值会抛
+        // TypeError: Assignment to constant variable.（曾让撤卡逻辑在探测成功后中断，静默失效）
+        pendingProbeCache.sessionId = sessionId;
+        pendingProbeCache.at = Date.now();
+        pendingProbeCache.items = items;
     }
     const pendingSet = new Set((items || []).map((item) => item.id));
     for (const oid of attachedOpenIds) {
