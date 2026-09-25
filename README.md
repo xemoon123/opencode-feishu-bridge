@@ -53,16 +53,17 @@ opencode(MCP client) ── stdio ── dist/feishu-mcp-server.js ── HTTP 4
 ## 安装
 
 ```bash
-# 方式一：npm 全局安装
-npm i -g opencode-feishu-bridge
-# 启动
-ofbs
-
-# 方式二：源码运行
 git clone https://github.com/xemoon123/opencode-feishu-bridge.git && cd opencode-feishu-bridge
 npm install
-npm start        # 等价 node dist/main.js
+
+npm start            # 直接运行（等价 node dist/main.js）
+# 或者装成全局命令，之后直接敲 ofbs / ofbc
+npm i -g .
+ofbs
 ```
+
+> ⚠️ npm 上的 `opencode-feishu-bridge` 是**上游作者的包（1.0.3）**，不是本仓库；
+> `npm i -g opencode-feishu-bridge` 装到的不是这里的功能。请用上面的 clone 方式安装。
 
 首次启动若 `~/.config/opencode/feishu-bridge/config.json` 不存在，会在交互终端引导创建；也可手动按 `config.example.json` 创建。
 Windows 上同样是 `%USERPROFILE%\.config\opencode\feishu-bridge\config.json`（opencode 自身也用这套 XDG 约定）。
