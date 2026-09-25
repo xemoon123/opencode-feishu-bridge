@@ -47,6 +47,8 @@ opencode(MCP client) ── stdio ── dist/feishu-mcp-server.js ── HTTP 4
 - Node.js >= 20（内置 fetch/AbortSignal）
 - OpenCode CLI：`npm i -g opencode-ai`（或官方二进制），并已配置可用的 provider/model
 - 一个飞书自建应用（机器人能力 + 事件订阅长连接）
+- 操作系统：macOS / Linux / **Windows 10 1809+ 或 Windows 11（原生，无需 WSL）**
+  - 服务常驻：macOS 用 launchd（见 `examples/`）；Linux 用 systemd；Windows 用任务计划程序或 `pm2`/`nssm`（见下文）
 
 ## 安装
 
@@ -57,12 +59,58 @@ npm i -g opencode-feishu-bridge
 ofbs
 
 # 方式二：源码运行
-git clone <本仓库地址> && cd opencode-feishu-bridge
+git clone https://github.com/xemoon123/opencode-feishu-bridge.git && cd opencode-feishu-bridge
 npm install
 npm start        # 等价 node dist/main.js
 ```
 
 首次启动若 `~/.config/opencode/feishu-bridge/config.json` 不存在，会在交互终端引导创建；也可手动按 `config.example.json` 创建。
+Windows 上同样是 `%USERPROFILE%\.config\opencode\feishu-bridge\config.json`（opencode 自身也用这套 XDG 约定）。
+
+### Windows（原生）
+
+无需 WSL，步骤与上面一致（PowerShell）：
+
+```powershell
+npm i -g opencode-ai              # opencode CLI
+npm i -g opencode-feishu-bridge   # 桥本体
+ofbs                              # 启动（npm 生成的 ofbs.cmd）
+```
+
+**关于 `opencode` 的启动**：Windows 上 npm 只会生成 `opencode.cmd` 垫片，而 Node 的 `spawn`
+在 Windows 下走 CreateProcess，不带扩展名时只补 `.exe`（找不到 `.cmd`），显式传 `.cmd`
+在现代 Node 又会直接 `EINVAL`。桥因此内置了平台解析（`dist/opencode-exec.js`），按
+**真实 `.exe` → 解析 `.cmd` 垫片里的目标 → `cmd.exe /d /s /c` 兜底** 的顺序启动，
+并用 `taskkill /PID <pid> /T /F` 结束整棵进程树（避免 cmd 垫片留下孤儿 serve 占住端口）。
+启动日志会打印实际方式：
+
+```
+[opencode-serve 127.0.0.1:4096]: launch kind=exe-shim source=C:\Users\me\AppData\Roaming\npm\opencode.cmd -> ...\opencode.exe
+```
+
+若你的 opencode 装在非标准位置，用 `OPENCODE_BIN` 指定绝对路径（最高优先级）：
+
+```powershell
+$env:OPENCODE_BIN = "C:\tools\opencode\opencode.exe"
+```
+
+**常驻（开机自启）**：任务计划程序即可（管理员 PowerShell）：
+
+```powershell
+# 登录时启动，失败自动重启
+schtasks /Create /TN opencode-feishu-bridge /SC ONLOGON /RL LIMITED /F ^
+  /TR "\"%ProgramFiles%\nodejs\node.exe\" \"%APPDATA%\npm\node_modules\opencode-feishu-bridge\dist\main.js\""
+# 查看 / 删除
+schtasks /Query /TN opencode-feishu-bridge
+schtasks /Delete /TN opencode-feishu-bridge /F
+```
+
+也可以直接用 `pm2`（`pm2 start ofbs --name ofbs` + `pm2 save`）或 `nssm` 注册成服务。
+日志默认打到控制台，用任务计划程序时可在 `/TR` 包一层重定向，或直接用 pm2 的日志。
+
+**已知差异**：Windows 上没有 POSIX 信号，`/restart`、看门狗重启、每日定时重启改为
+`taskkill /T /F` 强杀后重新拉起（SQLite 事务安全，会话不丢）；`/status` 里给出的
+`opencode attach …` 命令会自动改用双引号引用，可直接粘进 PowerShell。
 
 ## 飞书开放平台后台最小配置
 
@@ -211,10 +259,11 @@ opencode-feishu-bridge/
 │   ├── config.js                  # 配置加载/校验（zod）
 │   ├── interaction.js             # 提问/授权/菜单卡片的纯函数构建与文本解析
 │   ├── opencode.js                # opencode serve 生命周期 + HTTP/SSE 客户端 + 多目录事件订阅
+│   ├── opencode-exec.js           # opencode CLI 跨平台启动/终止（Windows .cmd 垫片、taskkill）
 │   ├── table-card.js              # Markdown 表格 → 飞书卡片原生表格组件
 │   ├── main.js                    # 桥主程序：飞书事件、本地命令、转发、HTTP API
 │   └── feishu-mcp-server.js       # 可选 stdio MCP server（feishu_send_file）
-├── scripts/                       # 安装/卸载脚本、单元测试（test-table-card.js）
+├── scripts/                       # 安装/卸载脚本、单元测试（test-table-card.js / test-opencode-exec.js）
 ├── skills/feishu-bridge/          # 提供给模型的 Skill（桥能力说明）
 ├── examples/                      # launchd 常驻示例
 ├── config.example.json
@@ -315,6 +364,16 @@ opencode 的已知行为，被中断后该目录的所有 prompt 都会在毫秒
 会，默认 `03:00`：只有在**当时没有任务在跑**时才重启；若正在跑任务，会在窗口（默认 60 分钟）内
 等它跑完再重启，等不到就顺延到次日，**不会打断任务**。想换时间改 `OPENCODE_DAILY_RESTART=04:30`，
 不想用就设 `off`。日志里能看到 `每日定时重启` 或 `定时重启跳过`。
+
+**Windows 上启动报 `spawn opencode ENOENT` / `EINVAL`？**
+桥没能定位到 opencode 可执行文件。本仓库已内置 Windows 解析（真 `.exe` → `.cmd` 垫片 → `cmd.exe` 兜底，
+见「Windows（原生）」）。若安装方式比较特殊，指定绝对路径后重启即可：
+
+```powershell
+$env:OPENCODE_BIN = "C:\tools\opencode\opencode.exe"
+```
+
+启动日志里的 `[opencode-serve ...]: launch kind=... source=...` 会告诉你实际用了哪一种。
 
 ## 发布
 

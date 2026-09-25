@@ -22,6 +22,7 @@ exports.abortOpenCodeSession = abortOpenCodeSession;
 exports.getOpenCodeSessionStatus = getOpenCodeSessionStatus;
 exports.restartOpenCodeServe = restartOpenCodeServe;
 const node_child_process_1 = require("node:child_process");
+const opencode_exec_1 = require("./opencode-exec");
 const config_1 = require("./config");
 const undici_1 = require("undici");
 // 关闭 undici 默认的 headers/body 超时（默认各 300s）：
@@ -89,18 +90,8 @@ async function stopOpenCodeServe() {
         return;
     }
     const processToStop = serveProcess;
-    await new Promise((resolve) => {
-        const timeout = setTimeout(() => {
-            if (!processToStop.killed) {
-                processToStop.kill("SIGKILL");
-            }
-        }, 5000);
-        processToStop.once("close", () => {
-            clearTimeout(timeout);
-            resolve();
-        });
-        processToStop.kill("SIGTERM");
-    });
+    // Windows 无信号语义且可能是 cmd.exe 垫片：由 terminateChild 走 taskkill /T /F 结束进程树
+    await (0, opencode_exec_1.terminateChild)(processToStop);
 }
 async function startServeProcess(config) {
     const args = [
@@ -110,13 +101,14 @@ async function startServeProcess(config) {
         "--port",
         String(config.port)
     ];
-    const child = (0, node_child_process_1.spawn)("opencode", args, {
+    const { child, plan } = (0, opencode_exec_1.spawnOpenCode)(args, {
         cwd: OPENCODE_DEFAULT_WORKDIR,
         env: process.env,
         stdio: ["ignore", "pipe", "pipe"]
     });
     serveProcess = child;
     const prefix = `[opencode-serve ${config.hostname}:${config.port}]`;
+    console.log(`${prefix}: launch kind=${plan.kind} source=${plan.source}`);
     child.stdout.on("data", (chunk) => {
         const message = chunk.toString("utf8").trim();
         if (message) {
@@ -144,9 +136,7 @@ async function startServeProcess(config) {
         console.log(`${prefix}: ready`);
     }
     catch (error) {
-        if (!child.killed) {
-            child.kill("SIGTERM");
-        }
+        await (0, opencode_exec_1.terminateChild)(child, { graceMs: 3000 });
         serveProcess = null;
         serveStartPromise = null;
         throw error;
@@ -444,31 +434,7 @@ async function restartHungServe(reason) {
     }
     const label = reason ? String(reason) : "无响应";
     console.error(`[watchdog]: opencode serve ${label}，强制重启 pid=${String(child.pid)}`);
-    await new Promise((resolve) => {
-        const force = setTimeout(() => {
-            try {
-                child.kill("SIGKILL");
-            }
-            catch {
-                // 进程可能已退出
-            }
-        }, 5000);
-        child.once("close", () => {
-            clearTimeout(force);
-            resolve();
-        });
-        try {
-            child.kill("SIGTERM");
-        }
-        catch {
-            try {
-                child.kill("SIGKILL");
-            }
-            catch {
-                // 忽略
-            }
-        }
-    });
+    await (0, opencode_exec_1.terminateChild)(child);
     serveProcess = null;
     serveStartPromise = null;
     await initOpenCodeServe(currentServeConfig);
@@ -1263,7 +1229,7 @@ function stripAnsi(input) {
 }
 async function runCommand(args, timeoutMs, workingDirectory) {
     return await new Promise((resolve, reject) => {
-        const child = (0, node_child_process_1.spawn)("opencode", args, {
+        const { child } = (0, opencode_exec_1.spawnOpenCode)(args, {
             cwd: workingDirectory ?? OPENCODE_DEFAULT_WORKDIR,
             env: process.env,
             stdio: ["pipe", "pipe", "pipe"]
@@ -1282,7 +1248,7 @@ async function runCommand(args, timeoutMs, workingDirectory) {
         });
         const timeout = setTimeout(() => {
             timedOut = true;
-            child.kill("SIGTERM");
+            void (0, opencode_exec_1.terminateChild)(child, { graceMs: 2000 });
         }, timeoutMs);
         child.on("close", (code, signal) => {
             clearTimeout(timeout);

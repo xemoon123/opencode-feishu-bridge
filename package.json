@@ -28,8 +28,10 @@
     "start": "node dist/main.js",
     "ofbs": "node bin/opencode-feishu-start.js",
     "attach": "node bin/opencode-attach.js",
-    "typecheck": "node --check dist/main.js && node --check dist/opencode.js && node --check dist/interaction.js && node --check dist/table-card.js && node --check dist/config.js && node --check dist/feishu-mcp-server.js",
+    "typecheck": "node --check dist/main.js && node --check dist/opencode.js && node --check dist/opencode-exec.js && node --check dist/interaction.js && node --check dist/table-card.js && node --check dist/config.js && node --check dist/feishu-mcp-server.js",
+    "test": "node scripts/test-table-card.js && node scripts/test-opencode-exec.js",
     "test:table-card": "node scripts/test-table-card.js",
+    "test:opencode-exec": "node scripts/test-opencode-exec.js",
     "pack": "npm pack --dry-run",
     "setup": "node scripts/install.js",
     "uninstall": "node scripts/uninstall.js"

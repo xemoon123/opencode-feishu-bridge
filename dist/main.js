@@ -47,6 +47,7 @@ const config_1 = require("./config");
 const opencode_1 = require("./opencode");
 const interaction_1 = require("./interaction");
 const table_card_1 = require("./table-card");
+const opencode_exec_1 = require("./opencode-exec");
 const client = new Lark.Client({
     appId: config_1.config.appId,
     appSecret: config_1.config.appSecret
@@ -1072,14 +1073,9 @@ function attachHostOf(host) {
     }
     return text;
 }
-/** POSIX shell 安全引用：含空格等特殊字符时整体用单引号包裹（内嵌单引号按 '"'"' 处理） */
+/** shell 安全引用：POSIX 用单引号（内嵌单引号按 '"'"' 处理），Windows 用双引号（PowerShell/cmd 都认） */
 function shellQuote(value) {
-    const text = String(value);
-    if (/^[A-Za-z0-9_@%+=:,./-]+$/.test(text)) {
-        return text;
-    }
-    const Q = String.fromCharCode(39);
-    return Q + text.split(Q).join(Q + '"' + Q + '"' + Q) + Q;
+    return (0, opencode_exec_1.quoteShellArg)(value, process.platform);
 }
 /**
  * 生成"在本机终端 attach 到该会话"的 opencode CLI 命令。
